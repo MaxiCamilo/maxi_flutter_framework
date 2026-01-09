@@ -1,6 +1,7 @@
 name: maxi_flutter_framework
 description: "A new Flutter package project."
 version: 0.0.1
+publish_to: none
 homepage:
 
 environment:
@@ -8,6 +9,17 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
+  meta: ^1.17.0
+  path: ^1.9.1
+  rxdart: ^0.28.0
+  provider: ^6.1.5+1
+
+  maxi_framework:
+  #git:
+    #  url: https://github.com/MaxiCamilo/maxi_framework.git
+    #  ref: main
+    path: ../maxi_framework
+
   flutter:
     sdk: flutter
 

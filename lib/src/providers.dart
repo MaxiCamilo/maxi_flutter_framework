@@ -1,0 +1,1 @@
+export 'providers/translate_providers.dart';
