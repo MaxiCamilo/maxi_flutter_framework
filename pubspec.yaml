@@ -21,6 +21,9 @@ dependencies:
     #  ref: main
     path: ../maxi_framework
 
+  maxi_thread:
+    path: ../maxi_thread
+
   flutter:
     sdk: flutter
 

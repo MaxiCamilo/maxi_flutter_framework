@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:maxi_flutter_framework/src/android_service/channels/android_service_connector_channel.dart';
+import 'package:maxi_flutter_framework/src/app_managers/flutter_manager.dart';
 import 'package:maxi_framework/maxi_framework.dart';
 
 class AndroidServiceConnector with DisposableMixin, AsynchronouslyInitializedMixin, LifecycleHub {
@@ -22,10 +23,14 @@ class AndroidServiceConnector with DisposableMixin, AsynchronouslyInitializedMix
   static const String kGetServerName = 'mx.getServerName';
   @internal
   static const String kSetServerName = 'mx.setServerName';
-
+  @internal
   static const String kRequestStopService = 'mx.requestStopService';
   @internal
   static const String kStopedService = 'mx.stopedService';
+  @internal
+  static const String kAppStatusChanged = 'mx.appStatusChanged';
+  @internal
+  static const String kGetAppStatus = 'mx.getAppStatus';
 
   AndroidServiceConnector({
     required this.autoStart,
@@ -77,8 +82,23 @@ class AndroidServiceConnector with DisposableMixin, AsynchronouslyInitializedMix
       );
     }
 
-    joinStream(stream: _backgroundService.on(kGetServerName), onData: (event) => _backgroundService.invoke(kSetServerName, {'name': serviceName}));
-    joinStream(stream: _backgroundService.on(kStopedService), onData: (event) => dispose());
+    lifecycleScope.joinStream(stream: _backgroundService.on(kGetServerName), onData: (event) => _backgroundService.invoke(kSetServerName, {'name': serviceName}));
+    lifecycleScope.joinStream(stream: _backgroundService.on(kStopedService), onData: (event) => dispose());
+
+    final stateResult = appManager.dynamicCastResult<FlutterManager>().select((x) => x.statusObserver.appLifecycleStateChanged);
+    if (stateResult.itsFailure) {
+      return stateResult.cast();
+    }
+
+    lifecycleScope.joinStream(stream: stateResult.content, onData: (state) => _backgroundService.invoke(kAppStatusChanged, {'value': state.index}));
+    lifecycleScope.joinStream(
+      stream: _backgroundService.on(kGetAppStatus),
+      onData: (event) async {
+        final value = await appManager.dynamicCastResult<FlutterManager>().onCorrectFuture((x) => x.statusObserver.getCurrentAppLifecycleState()).waitContentOrThrow();
+
+        _backgroundService.invoke(kAppStatusChanged, {'value': value.index});
+      },
+    );
 
     return voidResult;
   }

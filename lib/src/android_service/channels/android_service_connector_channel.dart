@@ -30,10 +30,10 @@ class AndroidServiceConnectorChannel with DisposableMixin, InitializableMixin, L
       );
     }
 
-    _receiverStream = joinStreamController(StreamController<Map<String, dynamic>>.broadcast());
+    _receiverStream = lifecycleScope.joinStreamController(StreamController<Map<String, dynamic>>.broadcast());
     _backgroundService = backgroundServiceProvider();
-    joinStream(
-      stream: _backgroundService.on(streamName),
+    lifecycleScope.joinStream(
+      stream: _backgroundService.on('sv.$streamName'),
       onData: (item) {
         _receiverStream.add(item ?? const {});
       },
@@ -65,7 +65,11 @@ class AndroidServiceConnectorChannel with DisposableMixin, InitializableMixin, L
         stackTrace: st,
         message: const FixedOration(message: 'Failed to send item through service channel'),
       ),
-      function: () => _backgroundService.invoke(streamName, item),
+      function: () => _backgroundService.invoke('fl.$streamName', item),
     );
+  }
+  
+  @override
+  void performObjectDiscard() {
   }
 }
