@@ -64,7 +64,7 @@ class FlutterStatusObserverIsolated with DisposableMixin, AsynchronouslyInitiali
       channel.sendItem(state).logIfFails(errorName: 'Failed to send app lifecycle state change through channel in FlutterStatusObserverIsolated');
     }, onDone: () => channel.dispose());
 
-    await channel.onDispose.whenComplete(() => subscription.cancel());
+    await channel.onDispose.toFuture().whenComplete(() => subscription.cancel());
 
     return voidResult;
   }
