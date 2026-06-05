@@ -85,7 +85,7 @@ class AndroidServiceConnector with DisposableMixin, AsynchronouslyInitializedMix
     lifecycleScope.joinStream(stream: _backgroundService.on(kGetServerName), onData: (event) => _backgroundService.invoke(kSetServerName, {'name': serviceName}));
     lifecycleScope.joinStream(stream: _backgroundService.on(kStopedService), onData: (event) => dispose());
 
-    final stateResult = appManager.dynamicCastResult<FlutterManager>().select((x) => x.statusObserver.appLifecycleStateChanged);
+    final stateResult = appManager.dynamicCastResult<FlutterManager>().onCorrectSelect((x) => x.statusObserver.appLifecycleStateChanged);
     if (stateResult.itsFailure) {
       return stateResult.cast();
     }
@@ -126,7 +126,7 @@ class AndroidServiceConnector with DisposableMixin, AsynchronouslyInitializedMix
     }
 
     _backgroundService.invoke(kRequestStopService);
-    return await onDispose.toFutureResult().timeout(
+    return await onDispose.toFuture().timeout(
       const Duration(seconds: 5),
       onTimeout: () {
         return NegativeResult.controller(
