@@ -119,6 +119,11 @@ class FlutterNativeManager
       if (statusObserverInitResult.itsFailure) return statusObserverInitResult.cast();
     }
 
+    if (statusObserver is Initializable) {
+      final statusObserverInitResult = (statusObserver as Initializable).initialize();
+      if (statusObserverInitResult.itsFailure) return statusObserverInitResult.cast();
+    }
+
     return voidResult;
   }
 

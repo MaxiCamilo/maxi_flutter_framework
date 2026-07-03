@@ -4,7 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:maxi_flutter_framework/src/observers/status_observe/flutter_status_observer.dart';
 import 'package:maxi_framework/maxi_framework.dart';
 
-class FlutterStatusObserverServer with DisposableMixin, InitializableMixin, WidgetsBindingObserver implements FlutterStatusObserver {
+class FlutterStatusObserverServer with DisposableMixin, InitializableMixin, WidgetsBindingObserver, LifecycleHub implements FlutterStatusObserver {
   late AppLifecycleState _currentState;
 
   late StreamController<AppLifecycleState> _appLifecycleStateController;
@@ -13,6 +13,9 @@ class FlutterStatusObserverServer with DisposableMixin, InitializableMixin, Widg
   Result<void> performInitialization() {
     WidgetsFlutterBinding.ensureInitialized();
     WidgetsBinding.instance.addObserver(this);
+
+    _appLifecycleStateController = lifecycleScope.joinStreamController(StreamController<AppLifecycleState>.broadcast());
+
     return voidResult;
   }
 
