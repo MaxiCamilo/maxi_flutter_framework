@@ -1,2 +1,3 @@
-export 'android_service/android_service_connector.dart';
-export 'android_service/android_service_port.dart';
+export 'android_services/operators/android_service_builder.dart';
+export 'android_services/operators/android_service_interface.dart';
+export 'android_services/operators/android_service_extensions.dart';

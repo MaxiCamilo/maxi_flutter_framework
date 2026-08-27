@@ -1,18 +1,18 @@
-import 'package:flutter_background_service/flutter_background_service.dart';
-import 'package:maxi_flutter_framework/src/android_service/android_service_port.dart';
+import 'dart:ui';
+
+import 'package:flutter/widgets.dart';
+import 'package:maxi_flutter_framework/src/android_services/operators/android_service_client.dart';
+
 import 'package:maxi_flutter_framework/src/app_managers/flutter_manager.dart';
 import 'package:maxi_flutter_framework/src/observers/status_observe/flutter_status_observer.dart';
 import 'package:maxi_framework/maxi_framework.dart';
 import 'package:maxi_framework/maxi_framework_native_impl.dart';
 
 class FlutterServiceManager with DisposableMixin, AsynchronouslyInitializedMixin, LifecycleHub implements ApplicationManager, NativeAppManager, IsolatedReplicableApplicationManager, FlutterManager {
-  final ServiceInstance service;
-  final String serviceName;
+  final AndroidServiceClient serviceClient;
 
   bool _isDebug = false;
   String _currentWorkingPath = '¿?';
-
-  late final AndroidServicePort servicePort;
 
   @override
   bool get isAndroid => true;
@@ -51,10 +51,26 @@ class FlutterServiceManager with DisposableMixin, AsynchronouslyInitializedMixin
   bool get isWindows => false;
 
   @override
-  FlutterStatusObserver get statusObserver => servicePort;
+  FlutterStatusObserver get statusObserver => serviceClient;
 
-  FlutterServiceManager({required this.service, required this.serviceName}) {
-    servicePort = lifecycleScope.joinDisposableObject(AndroidServicePort(serviceInstance: service, serviceName: serviceName));
+  FlutterServiceManager({required this.serviceClient});
+
+  @override
+  Future<Result<void>> performInitialize() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    DartPluginRegistrant.ensureInitialized();
+
+    final debugModeResult = await CheckItsInDebugMode().execute();
+    if (debugModeResult.itsFailure) return debugModeResult.cast();
+    _isDebug = debugModeResult.content;
+
+    if (_currentWorkingPath == '¿?') {
+      final prepareWorkspaceResult = await PrepareNativeAppWorkspace(isDebug: _isDebug).execute();
+      if (prepareWorkspaceResult.itsFailure) return prepareWorkspaceResult.cast();
+      _currentWorkingPath = prepareWorkspaceResult.content;
+    }
+
+    return voidResult;
   }
 
   @override
@@ -103,18 +119,5 @@ class FlutterServiceManager with DisposableMixin, AsynchronouslyInitializedMixin
     throw UnimplementedError();
   }
 
-  @override
-  Future<Result<void>> performInitialize() async {
-    final debugModeResult = await CheckItsInDebugMode().execute();
-    if (debugModeResult.itsFailure) return debugModeResult.cast();
-    _isDebug = debugModeResult.content;
-
-    if (_currentWorkingPath == '¿?') {
-      final prepareWorkspaceResult = await PrepareNativeAppWorkspace(isDebug: _isDebug).execute();
-      if (prepareWorkspaceResult.itsFailure) return prepareWorkspaceResult.cast();
-      _currentWorkingPath = prepareWorkspaceResult.content;
-    }
-
-    return voidResult;
-  }
+  
 }
