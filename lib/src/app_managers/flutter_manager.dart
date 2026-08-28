@@ -1,3 +1,5 @@
+import 'dart:ui' show AppLifecycleState;
+
 import 'package:maxi_flutter_framework/src/observers/status_observe/flutter_status_observer.dart';
 import 'package:maxi_framework/maxi_framework.dart';
 
@@ -7,4 +9,8 @@ FlutterManager get flutterAppManager =>
 abstract interface class FlutterManager {
   FlutterStatusObserver get statusObserver;
   bool get isService;
+}
+
+extension FlutterManagerExtension on FlutterManager {
+  Stream<void> get onInterfaceDetached => statusObserver.appLifecycleStateChanged.where((state) => state == AppLifecycleState.detached);
 }

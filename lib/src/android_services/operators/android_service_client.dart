@@ -4,6 +4,7 @@ import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
+import 'package:maxi_flutter_framework/src/android_services/channels/android_service_client_data_channel.dart';
 import 'package:maxi_flutter_framework/src/android_services/operators/android_service_interface.dart';
 import 'package:maxi_flutter_framework/src/app_managers/flutter_service_manager.dart';
 import 'package:maxi_framework/maxi_framework.dart';
@@ -24,8 +25,15 @@ class AndroidServiceClient with DisposableMixin, AsynchronouslyInitializedMixin,
   Stream<AppLifecycleState> get appLifecycleStateChanged => _appLifecycleStateController.stream;
 
   @override
-  FutureResult<Channel<Map<String, dynamic>, Map<String, dynamic>>> buildChannel(String name) {
-    throw UnimplementedError();
+  FutureResult<Channel<Map<String, dynamic>, Map<String, dynamic>>> buildChannel(String name) async {
+    final initResult = await initialize();
+    if (initResult.itsFailure) {
+      return initResult.cast();
+    }
+
+    return ResultValue(
+      content: lifecycleScope.joinDisposableObject(AndroidServiceClientDataChannel(name: name, service: serviceInstance)),
+    );
   }
 
   @override
@@ -39,7 +47,6 @@ class AndroidServiceClient with DisposableMixin, AsynchronouslyInitializedMixin,
   @override
   Future<Result<void>> performInitialize() async {
     WidgetsFlutterBinding.ensureInitialized();
-    DartPluginRegistrant.ensureInitialized();
 
     _currentAppLifecycleState = AppLifecycleState.resumed;
     _appLifecycleStateController = lifecycleScope.joinStreamController(StreamController<AppLifecycleState>.broadcast());

@@ -121,7 +121,9 @@ class AndroidServiceServer with DisposableMixin, AsynchronouslyInitializedMixin,
       ),
     );
 
-    for (int i = 0; i < 150; i++) {
+    await Future.delayed(const Duration(milliseconds: 100));
+
+    for (int i = 0; i < 150000; i++) {
       final wait = completer.future.timeout(const Duration(milliseconds: 50), onTimeout: () => false);
       _service.invoke('service.echo');
       if (await wait) {

@@ -1,6 +1,3 @@
-import 'dart:ui';
-
-import 'package:flutter/widgets.dart';
 import 'package:maxi_flutter_framework/src/android_services/operators/android_service_client.dart';
 
 import 'package:maxi_flutter_framework/src/app_managers/flutter_manager.dart';
@@ -57,9 +54,6 @@ class FlutterServiceManager with DisposableMixin, AsynchronouslyInitializedMixin
 
   @override
   Future<Result<void>> performInitialize() async {
-    WidgetsFlutterBinding.ensureInitialized();
-    DartPluginRegistrant.ensureInitialized();
-
     final debugModeResult = await CheckItsInDebugMode().execute();
     if (debugModeResult.itsFailure) return debugModeResult.cast();
     _isDebug = debugModeResult.content;
@@ -118,6 +112,4 @@ class FlutterServiceManager with DisposableMixin, AsynchronouslyInitializedMixin
     // TODO: implement getWorkingPath
     throw UnimplementedError();
   }
-
-  
 }

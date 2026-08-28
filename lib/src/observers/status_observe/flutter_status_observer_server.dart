@@ -13,6 +13,7 @@ class FlutterStatusObserverServer with DisposableMixin, InitializableMixin, Widg
   Result<void> performInitialization() {
     WidgetsFlutterBinding.ensureInitialized();
     WidgetsBinding.instance.addObserver(this);
+    _currentState = WidgetsBinding.instance.lifecycleState ?? AppLifecycleState.resumed;
 
     _appLifecycleStateController = lifecycleScope.joinStreamController(StreamController<AppLifecycleState>.broadcast());
 

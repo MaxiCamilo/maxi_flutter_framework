@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:maxi_flutter_framework/src/android_services/operators/android_service_interface.dart';
 import 'package:maxi_framework/maxi_framework.dart';
 import 'package:rxdart/rxdart.dart';
@@ -85,6 +87,20 @@ extension AndroidServiceExtensions on AndroidServiceInterface {
     }
 
     return ResultValue(content: streamResult.content.doOnCancel(() => connector.dispose()));
+  }
+
+  FutureResult<void> listenAndResponse({required String name, required FutureResult<Map<String, dynamic>> Function(Map<String, dynamic> data) onRequest}) async {
+    await for (final part in await listenRequest(name: name).waitContentOrThrow()) {
+      final response = await onRequest(part);
+      if (response.itsFailure) {
+        log('Failed to process request: $part');
+        continue;
+      }
+
+      await sendRequest(name: name, data: response.content).logIfFails(errorName: 'listenAndResponse');
+    }
+
+    return voidResult;
   }
 
   FutureResult<Map<String, dynamic>> sendAndWaitResponse({required String name, required Duration timeout, Map<String, dynamic> data = const {}}) async {
