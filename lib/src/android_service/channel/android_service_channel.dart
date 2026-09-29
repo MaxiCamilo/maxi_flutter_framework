@@ -10,6 +10,9 @@ class AndroidServiceChannel with DisposableMixin, SynchronousInitializationMixin
   late final StreamController<Map<String, dynamic>> _controller;
   late final StreamSubscription<Map<String, dynamic>?> _receiverStream;
 
+  @override
+  bool get isActive => !isDisposed;
+
   AndroidServiceChannel(this.name, this.sender, this.streamBuilder);
 
   @override
@@ -42,4 +45,6 @@ class AndroidServiceChannel with DisposableMixin, SynchronousInitializationMixin
     _controller.close();
     _receiverStream.cancel();
   }
+
+  
 }
