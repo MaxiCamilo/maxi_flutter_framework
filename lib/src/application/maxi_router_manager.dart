@@ -72,7 +72,7 @@ class MaxiRouterManager extends ChangeNotifier with WidgetsBindingObserver imple
       state: state,
     );
 
-    final target = interceptor == null ? uri : interceptor!(this, event);
+    Uri? target = interceptor == null ? uri : interceptor!(this, event);
 
     if (target == null) {
       // Cancelado: si vino del browser, restauramos la URL.
@@ -82,6 +82,8 @@ class MaxiRouterManager extends ChangeNotifier with WidgetsBindingObserver imple
 
     final redirected = target != uri;
     if (target == _current && !redirected) return;
+
+    if (target.toString().isNotEmpty && target.toString()[0] != '/') target = Uri.parse('/${target.toString()}');
 
     final previous = _current;
     _current = target;
