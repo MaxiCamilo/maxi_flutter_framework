@@ -91,7 +91,7 @@ class MainAndroidService with DisposableMixin, WithLifecycleScopeMixin, Asynchro
   @override
   FutureResult<Channel<Map<String, dynamic>, Map<String, dynamic>>> buildChannel(String name) => futureScopeValue(() async {
     checkDisposed().$;
-    await initialize().$;
+    await $$_(initialize());
 
     final newChannel = AndroidServiceChannel(name, _service.invoke, _service.on);
     heart.attachChild(newChannel);
@@ -116,7 +116,7 @@ class MainAndroidService with DisposableMixin, WithLifecycleScopeMixin, Asynchro
   @override
   FutureEmptyResult<dynamic> ping({Duration? timeout}) => futureScopeVoid(() async {
     checkDisposed().$;
-    await initialize().$;
+    await $$_(initialize());
 
     final completer = Completer<Result<void>>();
     _service
@@ -143,14 +143,14 @@ class MainAndroidService with DisposableMixin, WithLifecycleScopeMixin, Asynchro
   @override
   Stream<AppLifecycleState> get lifecycleStateStream async* {
     checkDisposed().$;
-    await initialize().$;
+    await $$_(initialize());
     yield* _appLifecycleStateController.stream;
   }
 
   @override
   FutureResult<AppLifecycleState> obtainLifecycleState() => futureScopeValue(() async {
     checkDisposed().$;
-    await initialize().$;
+    await $$_(initialize());
     return _currentState;
   });
 }
